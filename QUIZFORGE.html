@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QuizForge</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#07090d;--text:#f4f7fb;--muted:#8993a3;--accent:#9fe3c0;--accent2:#7cc8ff;--danger:#ff7f93}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 20% 10%,#17231f 0,transparent 32%),radial-gradient(circle at 85% 85%,#14202b 0,transparent 30%),var(--bg);display:grid;place-items:center;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(120deg,transparent 20%,rgba(255,255,255,.025) 50%,transparent 80%);background-size:200% 100%;animation:shimmer 9s linear infinite;pointer-events:none}
+.glow{position:fixed;width:420px;height:420px;border-radius:50%;filter:blur(120px);opacity:.17;pointer-events:none;animation:float 8s ease-in-out infinite}.g1{background:#5ee6a6;top:-190px;left:-160px}.g2{background:#4e9eff;right:-190px;bottom:-170px;animation-delay:-4s}
+.app{width:min(900px,92vw);padding:35px 0;position:relative;z-index:1}
+.card{background:linear-gradient(145deg,rgba(18,23,33,.94),rgba(10,13,19,.94));border:1px solid rgba(255,255,255,.09);border-radius:28px;box-shadow:0 28px 90px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.04);padding:45px;backdrop-filter:blur(18px);animation:rise .6s cubic-bezier(.2,.8,.2,1)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:19px;margin-bottom:50px;letter-spacing:.2px}.logo{width:37px;height:37px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,#b7f4d5,#6dc9ff);color:#07100d;box-shadow:0 8px 28px rgba(126,221,184,.18);animation:logoPulse 3s ease-in-out infinite}
+.eyebrow{color:#9aa7b7;font-size:11px;font-weight:800;letter-spacing:2.4px;margin:0 0 14px}h1{font-size:clamp(40px,7vw,64px);line-height:1.02;margin:0;letter-spacing:-2.8px}h1 span{background:linear-gradient(90deg,#b9f3d5,#8ed5ff);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:#9da7b5;line-height:1.7;max-width:620px;margin:20px auto 35px}.center{text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;text-align:left}label{font-size:13px;color:#b3bdc9;font-weight:700}
+select{width:100%;margin-top:8px;padding:15px 44px 15px 15px;border-radius:13px;border:1px solid #303846;background:#0b0f16;color:#fff;font:inherit;outline:none;cursor:pointer;transition:.25s}
+select:hover,select:focus{border-color:#6a9e8b;box-shadow:0 0 0 4px rgba(126,221,184,.08)}
+.btn{border:0;border-radius:13px;padding:15px 21px;background:linear-gradient(135deg,#eaf5ef,#cde8ff);color:#0c1210;font-weight:850;font-size:14px;cursor:pointer;transition:transform .2s,box-shadow .2s,filter .2s}.btn:hover{transform:translateY(-3px);box-shadow:0 14px 35px rgba(143,215,188,.2);filter:brightness(1.04)}.btn:active{transform:translateY(-1px) scale(.98)}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.tip{color:#697586;font-size:12px;margin-top:18px}.hidden{display:none!important}
+.quiz{padding:30px 36px 35px}.qh{display:flex;justify-content:space-between;align-items:center}.small{font-size:15px;margin:0}.cat{color:#91a19c;font-size:10px;letter-spacing:1.8px;font-weight:850;margin-top:10px}.timer{padding:11px 14px;border:1px solid #303846;border-radius:12px;min-width:58px;text-align:center;background:#0c1119;box-shadow:inset 0 1px rgba(255,255,255,.03);font-variant-numeric:tabular-nums;transition:.25s}.timer.danger{color:var(--danger);border-color:#8a5360;animation:timerPulse .8s ease-in-out infinite}
+.pw{display:flex;gap:15px;align-items:center;margin:30px 0 50px;color:#727e8d;font-size:12px}.progress{height:6px;flex:1;background:#202733;border-radius:10px;overflow:hidden}.progress div{height:100%;width:0;background:linear-gradient(90deg,#8fe0ba,#80caff);border-radius:inherit;transition:width .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 18px rgba(128,202,255,.25)}
+.qarea{max-width:720px;margin:auto}.qarea h2{font-size:clamp(25px,4vw,35px);line-height:1.3;margin-bottom:30px;animation:questionIn .45s ease}.options{display:grid;grid-template-columns:1fr 1fr;gap:13px}.option{display:flex;align-items:center;gap:15px;text-align:left;padding:17px;border:1px solid #2d3541;border-radius:14px;background:linear-gradient(145deg,#10151e,#0c1017);color:#e9edf4;cursor:pointer;font:inherit;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s}.option:hover{transform:translateY(-3px);border-color:#5d7180;box-shadow:0 10px 25px rgba(0,0,0,.2)}.option.sel{border-color:#9fe3c0;background:linear-gradient(145deg,rgba(159,227,192,.13),rgba(124,200,255,.07));box-shadow:inset 0 0 0 1px rgba(159,227,192,.55),0 8px 28px rgba(100,190,155,.08)}.letter{width:31px;height:31px;flex:none;display:grid;place-items:center;border-radius:9px;background:#202630;color:#9ca8b7;font-size:12px;font-weight:850;transition:.2s}.sel .letter{background:#9fe3c0;color:#101612}.foot{text-align:right;margin-top:35px}
+.result{text-align:center}.ri{width:72px;height:72px;display:grid;place-items:center;margin:0 auto 25px;border-radius:50%;background:linear-gradient(135deg,rgba(159,227,192,.18),rgba(124,200,255,.15));color:#9fe3c0;font-size:30px;animation:pop .65s cubic-bezier(.2,1.4,.4,1)}.score{font-size:70px;font-weight:850;letter-spacing:-3px}.score small{font-size:28px;color:#697586}.result p{color:#8994a3}.bar{max-width:430px;height:8px;background:#252c35;border-radius:20px;margin:25px auto 35px;overflow:hidden}.bar div{height:100%;width:0;background:linear-gradient(90deg,#8fe0ba,#80caff);transition:1s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 20px rgba(128,202,255,.25)}
+.credit{text-align:center;color:#596575;font-size:11px;letter-spacing:1.4px;margin-top:20px;text-transform:uppercase}.credit strong{color:#7f8b9b;font-weight:750}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes questionIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.5) rotate(-12deg)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(25px,20px,0)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes logoPulse{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(2deg) scale(1.05)}}
+@keyframes timerPulse{50%{transform:scale(1.04)}}
+
+.review{max-width:650px;margin:0 auto 30px;text-align:left}
+.review-title{font-size:13px;font-weight:850;letter-spacing:1.4px;color:#aeb9c7;text-transform:uppercase;margin:0 0 12px}
+.review-item{padding:15px 16px;margin:10px 0;border:1px solid #303846;border-radius:14px;background:rgba(10,14,21,.72);animation:reviewIn .4s ease both}
+.review-item strong{display:block;color:#edf2f7;font-size:14px;line-height:1.5;margin-bottom:8px}
+.review-item .your{color:#a8b2c0;font-size:12px;margin:4px 0}
+.review-item .correct{color:#9fe3c0;font-size:12px;font-weight:750;margin:4px 0}
+.review-empty{color:#9fe3c0;text-align:center;font-size:13px;padding:12px}
+@keyframes reviewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:650px){.card{padding:32px 20px}.grid,.options{grid-template-columns:1fr}.quiz{padding:23px 18px 25px}.pw{margin:25px 0 35px}.qarea h2{font-size:25px}}
+.option:focus-visible,.btn:focus-visible,select:focus-visible{outline:3px solid var(--accent2);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*:before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+<main class="app">
+<section id="setup" class="card center">
+<div class="brand"><span class="logo">Q</span>QuizForge</div>
+<p class="eyebrow">MIXED KNOWLEDGE CHALLENGE</p>
+<h1>Test your <span>knowledge.</span></h1>
+<p class="sub">Programming, science, geography, technology, math and more — all in one quiz.</p>
+<div class="grid">
+<label>Questions<select id="count"><option value="5">5 questions</option><option value="10" selected>10 questions</option><option value="15">15 questions</option><option value="20">20 questions</option></select></label>
+<label>Time per question<select id="time"><option value="15">15 seconds</option><option value="20" selected>20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option></select></label>
+</div>
+<button class="btn">Start Quiz →</button><p class="tip">Choose your quiz length and time limit.</p>
+</section>
+
+<section id="quiz" class="card quiz hidden">
+<header class="qh"><div><div class="brand small"><span class="logo">Q</span>QuizForge</div><div id="cat" class="cat"></div></div><div id="timer" class="timer">20</div></header>
+<div class="pw"><div class="progress"><div id="prog"></div></div><span id="countText"></span></div>
+<div class="qarea"><h2 id="question"></h2><div id="options" class="options"></div><p id="status" class="tip" style="min-height:16px;margin-bottom:0"></p></div>
+<div class="foot"><button id="next" class="btn" disabled>Next question →</button></div>
+</section>
+
+<section id="result" class="card result hidden">
+<div class="ri">✓</div><p class="eyebrow">QUIZ COMPLETE</p><h1 id="title">Well done!</h1>
+<div class="score"><span id="score">0</span><small id="total"> / 10</small></div><p id="message"></p>
+<div class="bar"><div id="fill"></div></div>
+<div id="review" class="review"></div>
+<button class="btn">Try Again ↻</button>
+</section>
+<div class="credit">Made by <strong>Faisal Khan</strong></div>
+</main>
+<script>
+const bank=[
+["Which language is primarily used to style web pages?",["HTML","CSS","Python","SQL"],1,"Web"],
+["What is the capital of Japan?",["Seoul","Beijing","Tokyo","Bangkok"],2,"General"],
+["Which data structure follows LIFO order?",["Queue","Stack","Array","Graph"],1,"Computer Science"],
+["What is the chemical symbol for gold?",["Ag","Au","Gd","Go"],1,"Science"],
+["Which planet is known as the Red Planet?",["Venus","Mars","Jupiter","Mercury"],1,"Science"],
+["Who wrote '1984'?",["George Orwell","J.K. Rowling","Mark Twain","Ernest Hemingway"],0,"Literature"],
+["Which protocol is commonly used to securely browse websites?",["HTTP","FTP","HTTPS","SMTP"],2,"Technology"],
+["What is 12 × 8?",["86","96","108","88"],1,"Math"],
+["Which country is famous for the ancient pyramids at Giza?",["Mexico","Greece","Egypt","India"],2,"History"],
+["What does CPU stand for?",["Central Processing Unit","Computer Power Utility","Core Program Unit","Central Program User"],0,"Computer Science"],
+["Which ocean is the largest?",["Atlantic","Indian","Pacific","Arctic"],2,"Geography"],
+["Which Python keyword defines a function?",["func","define","def","function"],2,"Python"],
+["Which gas do plants mainly absorb during photosynthesis?",["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],1,"Science"],
+["Which file extension is commonly used for Python source files?",[".java",".py",".cpp",".html"],1,"Python"],
+["How many continents are commonly recognized?",["5","6","7","8"],2,"Geography"],
+["What is the binary representation of decimal 2?",["01","10","11","100"],1,"Computer Science"],
+["Which is the fastest land animal?",["Lion","Cheetah","Horse","Leopard"],1,"General"],
+["What is the SI unit of electric current?",["Volt","Watt","Ohm","Ampere"],3,"Science"],
+["Which HTML tag is used for the largest heading?",["<h6>","<head>","<h1>","<title>"],2,"Web"],
+["Which planet is the largest in our solar system?",["Earth","Saturn","Jupiter","Neptune"],2,"Science"]
+];
+
+let qs=[], ans=[], i=0, chosen=null, secs=20, interval=null, timeLimit=20;
+let runToken=0, timeoutPending=null, deadline=0, quizFinished=false;
+
+const $ = id => document.getElementById(id);
+
+function isValidQuestion(q){
+  return Array.isArray(q) &&
+    typeof q[0] === "string" && q[0].trim() !== "" &&
+    Array.isArray(q[1]) && q[1].length >= 2 &&
+    q[1].every(option => typeof option === "string") &&
+    Number.isInteger(q[2]) && q[2] >= 0 && q[2] < q[1].length &&
+    typeof q[3] === "string" && q[3].trim() !== "";
+}
+
+function clearTimers(){
+  clearInterval(interval);
+  interval=null;
+  if(timeoutPending!==null){
+    clearTimeout(timeoutPending);
+    timeoutPending=null;
+  }
+}
+
+function start(){
+  clearTimers();
+  runToken++;
+  quizFinished=false;
+
+  const validBank=bank.filter(isValidQuestion);
+  if(!validBank.length){
+    alert("No valid questions are available. Please check the question bank.");
+    return;
+  }
+
+  const requested=Number.parseInt($("count").value,10)||10;
+  const n=Math.max(1,Math.min(requested,validBank.length));
+  timeLimit=Math.max(1,Number.parseInt($("time").value,10)||20);
+
+  const shuffled=[...validBank];
+  for(let k=shuffled.length-1;k>0;k--){
+    const r=Math.floor(Math.random()*(k+1));
+    [shuffled[k],shuffled[r]]=[shuffled[r],shuffled[k]];
+  }
+
+  qs=shuffled.slice(0,n);
+  ans=Array(n).fill(null);
+  i=0;
+
+  $("setup").classList.add("hidden");
+  $("result").classList.add("hidden");
+  $("review").replaceChildren();
+  $("fill").style.width="0%";
+  $("quiz").classList.remove("hidden");
+  render();
+}
+
+function render(){
+  clearTimers();
+  if(!qs.length || !qs[i]){
+    finish();
+    return;
+  }
+
+  chosen=ans[i];
+  const q=qs[i];
+
+  $("cat").textContent=q[3].toUpperCase();
+  $("question").textContent=q[0];
+  $("countText").textContent=`${i+1} / ${qs.length}`;
+  $("prog").style.width=((i+1)/qs.length*100)+"%";
+  $("status").textContent="";
+
+  const box=$("options");
+  box.replaceChildren();
+
+  q[1].forEach((x,j)=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="option"+(chosen===j?" sel":"");
+    b.setAttribute("aria-pressed",String(chosen===j));
+
+    const letter=document.createElement("span");
+    letter.className="letter";
+    letter.textContent=String.fromCharCode(65+j);
+
+    const text=document.createElement("span");
+    text.textContent=x;
+
+    b.append(letter,text);
+    b.addEventListener("click",()=>choose(j));
+    box.appendChild(b);
+  });
+
+  const nb=$("next");
+  nb.disabled=chosen===null;
+  nb.textContent=i===qs.length-1?"Finish quiz ✓":"Next question →";
+
+  deadline=performance.now()+timeLimit*1000;
+  updateCountdown();
+  interval=setInterval(updateCountdown,250);
+}
+
+function updateCountdown(){
+  if(quizFinished) return;
+  const remaining=Math.max(0,deadline-performance.now());
+  secs=Math.ceil(remaining/1000);
+  updateTimer();
+
+  if(remaining<=0){
+    clearInterval(interval);
+    interval=null;
+    handleTimeout();
+  }
+}
+
+function handleTimeout(){
+  if(quizFinished || !qs.length) return;
+
+  const token=runToken;
+  const questionIndex=i;
+  $("next").disabled=true;
+
+  if(ans[questionIndex]===null){
+    ans[questionIndex]=-1;
+    chosen=-1;
+    $("status").textContent="Time's up — question skipped.";
+  }
+
+  timeoutPending=setTimeout(()=>{
+    timeoutPending=null;
+    if(quizFinished || token!==runToken || i!==questionIndex || $("quiz").classList.contains("hidden")) return;
+    if(i<qs.length-1){
+      i++;
+      render();
+    }else{
+      finish();
+    }
+  },300);
+}
+
+function updateTimer(){
+  const el=$("timer");
+  el.textContent=Math.max(0,secs);
+  el.classList.toggle("danger",secs<=5 && secs>0);
+}
+
+function choose(j){
+  if(quizFinished || secs<=0 || !qs[i] || j<0 || j>=qs[i][1].length) return;
+
+  chosen=j;
+  ans[i]=j;
+
+  document.querySelectorAll(".option").forEach((x,k)=>{
+    const selected=k===j;
+    x.classList.toggle("sel",selected);
+    x.setAttribute("aria-pressed",String(selected));
+  });
+
+  $("next").disabled=false;
+  $("status").textContent="";
+}
+
+function nextQuestion(){
+  if(quizFinished || ans[i]===null || secs<=0) return;
+
+  clearTimers();
+
+  if(i<qs.length-1){
+    i++;
+    render();
+  }else{
+    finish();
+  }
+}
+
+function finish(){
+  if(quizFinished) return;
+  quizFinished=true;
+  clearTimers();
+  runToken++;
+
+  if(!qs.length){
+    $("quiz").classList.add("hidden");
+    $("setup").classList.remove("hidden");
+    return;
+  }
+
+  const score=qs.reduce((s,q,k)=>s+(ans[k]===q[2]?1:0),0);
+  const pct=Math.round((score/qs.length)*100);
+
+  $("quiz").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  $("score").textContent=score;
+  $("total").textContent=" / "+qs.length;
+
+  const fill=$("fill");
+  fill.style.width="0%";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fill.style.width=pct+"%";
+  }));
+
+  $("title").textContent=pct>=80?"Outstanding!":pct>=60?"Well done!":"Keep going!";
+  $("message").textContent=
+    pct>=80?"Excellent performance. You really know your stuff.":
+    pct>=60?"Nice work. A little more practice and you'll be flying.":
+    "Good attempt. Keep practicing and try again.";
+
+  const review=$("review");
+  review.replaceChildren();
+  const wrong=qs.map((q,k)=>({q,k})).filter(({q,k})=>ans[k]!==q[2]);
+
+  if(wrong.length===0){
+    const empty=document.createElement("div");
+    empty.className="review-empty";
+    empty.textContent="✓ Perfect score — no wrong answers!";
+    review.appendChild(empty);
+    return;
+  }
+
+  const reviewTitle=document.createElement("p");
+  reviewTitle.className="review-title";
+  reviewTitle.textContent=`Questions to review (${wrong.length})`;
+  review.appendChild(reviewTitle);
+
+  wrong.forEach(({q,k},index)=>{
+    const item=document.createElement("div");
+    item.className="review-item";
+    item.style.animationDelay=(index*60)+"ms";
+
+    const question=document.createElement("strong");
+    question.textContent=`${k+1}. ${q[0]}`;
+
+    const your=document.createElement("p");
+    your.className="your";
+    const yourAnswer=ans[k]===-1 || ans[k]===null
+      ? "Not answered (time ran out)"
+      : (q[1][ans[k]] ?? "Invalid answer");
+    your.textContent=`Your answer: ${yourAnswer}`;
+
+    const correct=document.createElement("p");
+    correct.className="correct";
+    correct.textContent=`Correct answer: ${q[1][q[2]]}`;
+
+    item.append(question,your,correct);
+    review.appendChild(item);
+  });
+}
+
+function again(){
+  clearTimers();
+  quizFinished=true;
+  runToken++;
+  deadline=0;
+  $("result").classList.add("hidden");
+  $("quiz").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+}
+
+$("next").addEventListener("click",nextQuestion);
+document.querySelector("#setup .btn").addEventListener("click",start);
+document.querySelector("#result .btn").addEventListener("click",again);
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden && !quizFinished && qs.length && !$("quiz").classList.contains("hidden")){
+    updateCountdown();
+  }
+});
+
+window.addEventListener("pagehide",clearTimers);
+</script>
+</body>
+</html>
